@@ -35,10 +35,13 @@ class JabberBot(muc.MUCClient):
 
     def receivedGroupChat(self, room, user, body):
         if not user.nick.startswith(self.nick):
-            if body.startswith('/me '):
-                self.callback("JABBER: * %s %s" % (user.nick, body.replace('/me ', '', 1)))
-            else:
-                self.callback("JABBER: <%s> %s" % (user.nick, body))
+            #if body.startswith('/me '):
+            #    self.callback("JABBER: * %s %s" % (user.nick, body.replace('/me ', '', 1)))
+            #else:
+
+            # send to irc only command messages
+            if body.startswith('@toirc '):
+                self.callback("JABBER: <%s> %s" % (user.nick, body.replace('@toirc ', '', 1)))
 
     def sendMessage(self, msg):
         #log.msg("jabber <- %s" % (msg))
