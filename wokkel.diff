@@ -1,0 +1,25 @@
+Index: wokkel/muc.py
+===================================================================
+--- wokkel/muc.py	(revision 195)
++++ wokkel/muc.py	(working copy)
+@@ -741,6 +741,8 @@
+         if room is None:
+             # not in the room yet
+             return
++        if room_jid.resource is None:
++            return
+         user = room.getUser(room_jid.resource)
+         delay = None
+         # need to check for delay and x stanzas for delay namespace for backwards compatability
+@@ -1008,9 +1010,9 @@
+             user = User(room_jid.resource)
+ 
+         if status is not None:
+-            user.status = str(status)
++            user.status = unicode(status).encode('utf-8')
+         if show is not None:
+-            user.show   = str(show)
++            user.show   = unicode(show)
+ 
+         return user
+ 
