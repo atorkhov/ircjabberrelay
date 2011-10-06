@@ -16,7 +16,7 @@ Index: wokkel/muc.py
  
          if status is not None:
 -            user.status = str(status)
-+            user.status = unicode(status).encode('utf-8')
++            user.status = unicode(status)
          if show is not None:
 -            user.show   = str(show)
 +            user.show   = unicode(show)

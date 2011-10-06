@@ -23,17 +23,30 @@ class IrcBot(irc.IRCClient):
         if channel == self.nickname:
             return
 
-        self.factory.callback("IRC: <%s> %s" % (user, msg))
+        if self.isUtf8(msg):
+            self.factory.callback("IRC: <%s> %s" % (user, msg))
+        else:
+            self.factory.callback("IRC (CP1251): <%s> %s" % (user, msg.decode('cp1251').encode('utf-8')))
 
     def action(self, user, channel, msg):
         """This will get called when the bot sees someone do an action."""
         user = user.split('!', 1)[0]
 
-        self.factory.callback("IRC: * %s %s" % (user, msg))
+        if self.isUtf8(msg):
+            self.factory.callback("IRC: * %s %s" % (user, self.convertMsg(msg)))
+        else:
+            self.factory.callback("IRC (CP1251): * %s %s" % (user, msg.decode('cp1251').encode('utf-8')))
 
     def sendMessage(self, msg):
         #log.msg("irc <- %s" % (msg))
         self.msg(self.factory.channel, msg)
+
+    def isUtf8(self, msg):
+        try:
+            msg.decode('utf-8')
+            return False
+        except UnicodeDecodeError:
+            return True
 
 class IrcBotFactory(protocol.ClientFactory):
     protocol = IrcBot
