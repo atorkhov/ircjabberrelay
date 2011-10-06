@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sys
 from twisted.internet import defer
 from twisted.python import log
@@ -48,10 +50,12 @@ class JabberBot(muc.MUCClient):
                 except UnicodeDecodeError:
                     None
                 self.callback(msg)
-            if body.startswith('@toirc '):
+            elif body.startswith('@toirc '):
                 msg = "JABBER: <%s> %s" % (user.nick, body.replace('@toirc ', '', 1))
                 msg = msg.rstrip().encode('utf-8')
                 self.callback(msg)
+            elif body.startswith('@help'):
+                self.sendMessage(u"@toirc <сообщение> - послать сообщение в IRC\n@toirc1251 <сообщение> - послать сообщение в IRC в кодировке CP1251".encode('utf-8'))
 
     def sendMessage(self, msg):
         #log.msg("jabber <- %s" % (msg))
