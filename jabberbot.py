@@ -40,8 +40,18 @@ class JabberBot(muc.MUCClient):
             #else:
 
             # send to irc only command messages
+            if body.startswith('@toirc1251 '):
+                msg = body.replace('@toirc1251 ', '', 1).rstrip()
+                msg = "JABBER: <%s> %s" % (user.nick, msg)
+                try:
+                    msg = msg.encode('cp1251')
+                except UnicodeDecodeError:
+                    None
+                self.callback(msg)
             if body.startswith('@toirc '):
-                self.callback("JABBER: <%s> %s" % (user.nick, body.replace('@toirc ', '', 1)))
+                msg = "JABBER: <%s> %s" % (user.nick, body.replace('@toirc ', '', 1))
+                msg = msg.rstrip().encode('utf-8')
+                self.callback(msg)
 
     def sendMessage(self, msg):
         #log.msg("jabber <- %s" % (msg))

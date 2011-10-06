@@ -32,11 +32,11 @@ class RelayManager:
 
     def sendIRC(self, msg):
         if self.ircbot is not None:
-            reactor.callLater(1, self.ircbot.sendMessage, msg.encode('utf-8').rstrip())
+            reactor.callLater(1, self.ircbot.sendMessage, msg)
 
     def sendJabber(self, msg):
         if self.jabberbot is not None:
-            reactor.callLater(1, self.jabberbot.sendMessage, msg.rstrip())
+            reactor.callLater(1, self.jabberbot.sendMessage, msg)
 
 application = service.Application("ircjabberrelay")
 

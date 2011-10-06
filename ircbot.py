@@ -24,18 +24,18 @@ class IrcBot(irc.IRCClient):
             return
 
         if self.isUtf8(msg):
-            self.factory.callback("IRC: <%s> %s" % (user, msg))
+            self.factory.callback("IRC: <%s> %s" % (user, msg.rstrip()))
         else:
-            self.factory.callback("IRC (CP1251): <%s> %s" % (user, msg.decode('cp1251').encode('utf-8')))
+            self.factory.callback("IRC (CP1251): <%s> %s" % (user, msg.decode('cp1251').encode('utf-8').rstrip()))
 
     def action(self, user, channel, msg):
         """This will get called when the bot sees someone do an action."""
         user = user.split('!', 1)[0]
 
         if self.isUtf8(msg):
-            self.factory.callback("IRC: * %s %s" % (user, self.convertMsg(msg)))
+            self.factory.callback("IRC: * %s %s" % (user, msg.rstrip()))
         else:
-            self.factory.callback("IRC (CP1251): * %s %s" % (user, msg.decode('cp1251').encode('utf-8')))
+            self.factory.callback("IRC (CP1251): * %s %s" % (user, msg.decode('cp1251').encode('utf-8').rstrip()))
 
     def sendMessage(self, msg):
         #log.msg("irc <- %s" % (msg))
@@ -44,9 +44,9 @@ class IrcBot(irc.IRCClient):
     def isUtf8(self, msg):
         try:
             msg.decode('utf-8')
-            return False
-        except UnicodeDecodeError:
             return True
+        except UnicodeDecodeError:
+            return False
 
 class IrcBotFactory(protocol.ClientFactory):
     protocol = IrcBot
