@@ -6,6 +6,8 @@ class IrcBot(irc.IRCClient):
     def _get_nickname(self):
         return self.factory.nickname
     nickname = property(_get_nickname)
+    realname = "Gateway to fedora@conference.jabber.ru"
+    userinfo = "Sends all messages to jabber conference"
 
     def signedOn(self):
         self.join(self.factory.channel)
