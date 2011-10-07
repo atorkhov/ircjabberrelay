@@ -11,7 +11,7 @@ class JabberBot(muc.MUCClient):
 
     def __init__(self, manager, server, room, nick, callback):
         muc.MUCClient.__init__(self)
-        self.manaer   = manager
+        self.manager   = manager
         self.server   = server
         self.room     = room
         self.nick     = nick
@@ -55,7 +55,19 @@ class JabberBot(muc.MUCClient):
                 msg = msg.rstrip().encode('utf-8')
                 self.callback(msg)
             elif body.startswith('@help'):
-                self.sendMessage(u"@toirc <сообщение> - послать сообщение в IRC\n@toirc1251 <сообщение> - послать сообщение в IRC в кодировке CP1251".encode('utf-8'))
+                self.sendMessage('\n'.join(
+                    [u"@toirc <сообщение> - послать сообщение в IRC",
+                     u"@toirc1251 <сообщение> - послать сообщение в IRC в кодировке CP1251",
+                     u"@who - выводит список пользователей на IRC канале"
+                    ]).encode('utf-8'))
+            elif body.startswith('@who'):
+                if self.manager.ircbot is not None:
+                    self.manager.ircbot.names().addCallback(self.printOnline)
+
+    def printOnline(self, namelist):
+        namelist.sort()
+        msg = ' '.join(namelist)
+        self.groupChat(self.room_jid, msg.decode('utf-8'))
 
     def sendMessage(self, msg):
         #log.msg("jabber <- %s" % (msg))
