@@ -8,6 +8,9 @@ svn checkout https://svn.ik.nu/wokkel/branches/wokkel-muc-client-support-24 wokk
 * Patch it:
 (cd wokkel; patch -p0 < ../wokkel.diff)
 
+* Change irc/jabber channels to login on and jabber password:
+vi main.py
+
 * Run:
 /usr/bin/env PYTHONPATH=.:wokkel twistd -y main.py -n
 
