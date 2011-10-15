@@ -2,7 +2,23 @@ Index: wokkel/muc.py
 ===================================================================
 --- wokkel/muc.py	(revision 195)
 +++ wokkel/muc.py	(working copy)
-@@ -741,6 +741,8 @@
+@@ -715,6 +715,15 @@
+             return
+         user = self._changeUserStatus(room, room_jid, status, show)
+ 
++        for e in prs.elements():
++            if e.uri == NS_MUC_USER:
++                i = getattr(e, 'item', None)
++                if i:
++                    if i.hasAttribute('affiliation'):
++                        user.affiliation = i.getAttribute('affiliation')
++                    if i.hasAttribute('role'):
++                        user.role = i.getAttribute('role')
++
+         if room.inRoster(user):
+             # we changed status or nick 
+             muc_status = getattr(prs.x, 'status', None)
+@@ -741,6 +750,8 @@
          if room is None:
              # not in the room yet
              return
@@ -11,7 +27,7 @@ Index: wokkel/muc.py
          user = room.getUser(room_jid.resource)
          delay = None
          # need to check for delay and x stanzas for delay namespace for backwards compatability
-@@ -1008,9 +1010,9 @@
+@@ -1008,9 +1019,9 @@
              user = User(room_jid.resource)
  
          if status is not None:
