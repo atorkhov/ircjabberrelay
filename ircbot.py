@@ -24,6 +24,10 @@ class IrcBot(irc.IRCClient):
         """This will get called when the bot receives a message."""
         user = user.split('!', 1)[0]
 
+        # Check ignore list
+        if user in self.factory.manager.ignoreList:
+            return
+
         # Check to see if they're sending me a private message
         if channel == self.nickname:
             return
@@ -36,6 +40,14 @@ class IrcBot(irc.IRCClient):
     def action(self, user, channel, msg):
         """This will get called when the bot sees someone do an action."""
         user = user.split('!', 1)[0]
+
+        # Check ignore list
+        if user in self.factory.manager.ignoreList:
+            return
+
+        # Check to see if they're sending me a private message
+        if channel == self.nickname:
+            return
 
         if self.isUtf8(msg):
             self.factory.callback("IRC: * %s %s" % (user, msg.rstrip()))

@@ -36,6 +36,7 @@ class JabberBot(muc.MUCClient):
             config_result = yield self.configure(self.room_jid.userhost())
 
     def receivedGroupChat(self, room, user, body):
+        ismoderator = (user.role == 'moderator')
         if not user.nick.startswith(self.nick):
             #if body.startswith('/me '):
             #    self.callback("JABBER: * %s %s" % (user.nick, body.replace('/me ', '', 1)))
@@ -54,15 +55,35 @@ class JabberBot(muc.MUCClient):
                 msg = "JABBER: <%s> %s" % (user.nick, body.replace('@toirc ', '', 1))
                 msg = msg.rstrip().encode('utf-8')
                 self.callback(msg)
+            elif body.startswith('@who'):
+                if self.manager.ircbot is not None:
+                    self.manager.ircbot.names().addCallback(self.printOnline)
+            elif ismoderator and body.startswith('@ignore '):
+                nick = body.replace('@ignore ', '', 1).rstrip()
+                if not nick in self.manager.ignoreList:
+                    self.manager.addIgnore(nick)
+                    self.sendMessage("Ignoring %s" % (nick))
+            elif ismoderator and body.startswith('@unignore '):
+                nick = body.replace('@unignore ', '', 1).rstrip()
+                if nick in self.manager.ignoreList:
+                    self.manager.removeIgnore(nick)
+                    self.sendMessage("Unignoring %s" % (nick))
+            elif ismoderator and body.startswith('@ignorelist'):
+                if len(self.manager.ignoreList) > 0:
+                    self.sendMessage("Ignoring " + ' '.join(self.manager.ignoreList))
+                else:
+                    self.sendMessage("Not ignoring anybody")
             elif body.startswith('@help'):
                 self.sendMessage('\n'.join(
                     [u"@toirc <сообщение> - послать сообщение в IRC",
                      u"@toirc1251 <сообщение> - послать сообщение в IRC в кодировке CP1251",
                      u"@who - выводит список пользователей на IRC канале"
-                    ]).encode('utf-8'))
-            elif body.startswith('@who'):
-                if self.manager.ircbot is not None:
-                    self.manager.ircbot.names().addCallback(self.printOnline)
+                    ] + (
+                    [u"@ignore <ник> - заигнорить пользователя в IRC",
+                     u"@unignore <ник> - заигнорить пользователя в IRC",
+                     u"@ignorelist - вывести список заигноренных пользователей",
+                    ]
+                    if ismoderator else [])).encode('utf-8'))
 
     def printOnline(self, namelist):
         namelist.sort()

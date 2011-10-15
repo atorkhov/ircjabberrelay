@@ -7,8 +7,12 @@ from twisted.python import log
 from twisted.words.protocols.jabber import jid
 from wokkel.client import XMPPClient
 
+import json
+
 from ircbot import *
 from jabberbot import *
+
+IGNORE_LIST_FILEPATH = './ignore'
 
 #def gotProtocol(p):
 #    log.msg("Got protocol")
@@ -23,6 +27,8 @@ class RelayManager:
     def __init__(self):
         self.ircbot = None
         self.jabberbot = None
+        self.ignoreList = []
+        self.readIgnoreList()
 
     def setIRC(self, ircbot):
         self.ircbot = ircbot
@@ -37,6 +43,33 @@ class RelayManager:
     def sendJabber(self, msg):
         if self.jabberbot is not None:
             reactor.callLater(1, self.jabberbot.sendMessage, msg)
+
+    def addIgnore(self, nick):
+        if nick in self.ignoreList:
+            return
+        self.ignoreList.append(nick)
+        self.ignoreList.sort()
+        self.writeIgnoreList()
+
+    def removeIgnore(self, nick):
+        if not nick in self.ignoreList:
+            return
+        self.ignoreList.remove(nick)
+        self.writeIgnoreList()
+
+    def readIgnoreList(self):
+        try:
+            f = open(IGNORE_LIST_FILEPATH, 'r')
+            self.ignoreList = json.load(f)
+            f.close()
+        except:
+            return
+
+    def writeIgnoreList(self):
+        s = json.dumps(self.ignoreList)
+        f = open(IGNORE_LIST_FILEPATH, 'w')
+        f.write(s)
+        f.close()
 
 application = service.Application("ircjabberrelay")
 
