@@ -1,3 +1,7 @@
 wokkel
 *.pyc
 *.log
+*.rpm
+*.production
+/ircjabberrelay-*.tar.gz
+/old

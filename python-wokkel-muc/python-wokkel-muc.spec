@@ -14,7 +14,7 @@ BuildArch:      noarch
 BuildRequires:  python-devel, python-setuptools, python-twisted-words, python-twisted-names
 Requires:       python-twisted-words, python-twisted-names
 
-Conflicts:      python-%{libname}
+Provides:       python-%{libname} = %{version}
 
 %description
 Wokkel is collection of enhancements on top of the Twisted networking

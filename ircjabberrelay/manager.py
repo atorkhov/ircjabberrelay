@@ -1,5 +1,3 @@
-#!/usr/bin/env PYTHONPATH=.:wokkel twistd -n -y
-
 import sys
 from twisted.application import internet, service
 from twisted.internet import reactor
@@ -11,17 +9,7 @@ import json
 
 from ircbot import *
 from jabberbot import *
-
-IGNORE_LIST_FILEPATH = './ignore'
-
-#def gotProtocol(p):
-#    log.msg("Got protocol")
-#    ircbot = p
-#    reactor.callLater(20, sendIRC, "Ready")
-#    reactor.callLater(20, sendJabber, "Ready")
-##    p.sendMessage("Hello")
-##    reactor.callLater(1, p.sendMessage, "This is sent in a second")
-##    reactor.callLater(2, p.transport.loseConnection)
+from config import *
 
 class RelayManager:
     def __init__(self):
@@ -71,22 +59,22 @@ class RelayManager:
         f.write(s)
         f.close()
 
-application = service.Application("ircjabberrelay")
+def initIrcJabberRelay(application):
+    manager = RelayManager()
 
-manager = RelayManager()
+    # Configure IRC
+    ircfactory = IrcBotFactory(manager, cfg['ircchannel'], cfg['ircnick'], manager.sendJabber)
+    # point = TCP4ClientEndpoint(reactor, 'irc.freenode.net', 6667)
+    # d = point.connect(ircfactory)
+    # d.addCallback(gotProtocol)
+    connector = internet.TCPClient(cfg['ircserver'], cfg['ircport'], ircfactory)
+    connector.setServiceParent(application)
 
-# Configure IRC
-ircfactory = IrcBotFactory(manager, '#channel', 'bot', manager.sendJabber)
-#    point = TCP4ClientEndpoint(reactor, 'irc.freenode.net', 6667)
-#    d = point.connect(ircfactory)
-#    d.addCallback(gotProtocol)
-connector = internet.TCPClient('irc.freenode.net', 6667, ircfactory)
-connector.setServiceParent(application)
+    # Configure Jabber
+    xmppclient = XMPPClient(jid.internJID(cfg['jabberjid']), cfg['jabberpass'])
+    jabberbot = JabberBot(manager, cfg['jabberserver'], cfg['jabberchannel'], cfg['jabbernick'], manager.sendIRC)
+    xmppclient.logTraffic = False
+    jabberbot.setHandlerParent(xmppclient)
+    xmppclient.setServiceParent(application)
+    manager.setJabber(jabberbot)
 
-# Configure Jabber
-xmppclient = XMPPClient(jid.internJID("jid@jabber.ru/bot"), "xxxxxxxx")
-jabberbot = JabberBot(manager, "conference.jabber.ru", "channel", "bot", manager.sendIRC)
-xmppclient.logTraffic = True
-jabberbot.setHandlerParent(xmppclient)
-xmppclient.setServiceParent(application)
-manager.setJabber(jabberbot)
